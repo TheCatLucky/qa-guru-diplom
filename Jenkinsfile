@@ -29,7 +29,7 @@ pipeline {
           withAllureUpload(
             credentialsId: 'allure-testops-api-token',
             name: '${JOB_NAME} - #${BUILD_NUMBER}',
-            projectId: '5316',
+            projectId: '5323',
             results: [[path: 'allure-results']],
             serverId: 'Allure TestOps',
             tags: ''
