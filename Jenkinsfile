@@ -95,7 +95,7 @@ pipeline {
               "token": "${TELEGRAM_BOT_TOKEN}",
               "chat": "${TELEGRAM_CHAT_ID}",
               "templatePath": "/templates/telegram.ftl"
-            },
+            }
           }
 EOF
 
