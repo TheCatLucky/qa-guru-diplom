@@ -14,9 +14,9 @@ export class HeartbeatService {
         }
       });
 
-      const status = await response.status();
+      const status = response.status();
       const statusText = await response.statusText();
-      const headers = await response.headers();
+      const headers = response.headers();
 
       return {
         status,
@@ -34,9 +34,9 @@ export class HeartbeatService {
         }
       });
 
-      const status = await response.status();
+      const status = response.status();
       const statusText = await response.statusText();
-      const headers = await response.headers();
+      const headers = response.headers();
 
       return {
         status,
@@ -54,9 +54,9 @@ export class HeartbeatService {
         }
       });
 
-      const status = await response.status();
+      const status = response.status();
       const statusText = await response.statusText();
-      const headers = await response.headers();
+      const headers = response.headers();
 
       return {
         status,

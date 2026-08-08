@@ -20,8 +20,8 @@ export class TodoListService {
         }
       });
 
-      const status = await response.status();
-      const headers = await response.headers();
+      const status = response.status();
+      const headers = response.headers();
       const body = headers['content-type']?.includes('application/json')
         ? await response.json()
         : await response.text();
@@ -42,9 +42,9 @@ export class TodoListService {
         }
       });
 
-      const status = await response.status();
+      const status = response.status();
       const statusText = response.statusText();
-      const headers = await response.headers();
+      const headers = response.headers();
       const body = await response.json();
 
       return {
@@ -66,8 +66,8 @@ export class TodoListService {
         data
       });
 
-      const status = await response.status();
-      const headers = await response.headers();
+      const status = response.status();
+      const headers = response.headers();
       const body = headers['content-type']?.includes('application/json')
         ? await response.json()
         : await response.text();
@@ -89,8 +89,8 @@ export class TodoListService {
         data
       });
 
-      const status = await response.status();
-      const headers = await response.headers();
+      const status = response.status();
+      const headers = response.headers();
       const body = await response.json();
 
       return {
@@ -109,8 +109,8 @@ export class TodoListService {
         }
       });
 
-      const status = await response.status();
-      const headers = await response.headers();
+      const status = response.status();
+      const headers = response.headers();
 
       return {
         status,
@@ -128,9 +128,9 @@ export class TodoListService {
         data
       });
 
-      const status = await response.status();
+      const status = response.status();
       const statusText = response.statusText();
-      const headers = await response.headers();
+      const headers = response.headers();
       const body = headers['content-type']?.includes('application/json')
         ? await response.json()
         : await response.text();

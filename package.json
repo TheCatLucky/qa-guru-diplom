@@ -6,11 +6,9 @@
   "scripts": {
     "test": "npx playwright test",
     "test:ui": "npx playwright test --ui",
-    "codegen": "npx playwright codegen",
     "report": "npx playwright show-report",
     "allure:report": "rmdir /s /q allure-results allure-report & npm t && npx allure generate && npx allure open",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "eslint . --fix"
   },
   "keywords": [],
   "author": "",

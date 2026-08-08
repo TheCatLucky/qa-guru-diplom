@@ -10,8 +10,8 @@ export class ChallengerService {
     return test.step(`POST /${this.path}`, async () => {
       const response = await this.request.post(`${process.env.API_URL}/${this.path}`);
 
-      const status = await response.status();
-      const headers = await response.headers();
+      const status = response.status();
+      const headers = response.headers();
 
       return {
         status,

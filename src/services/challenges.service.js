@@ -14,8 +14,8 @@ export class ChallengesService {
         }
       });
 
-      const status = await response.status();
-      const headers = await response.headers();
+      const status = response.status();
+      const headers = response.headers();
       const body = await response.json();
 
       return {
