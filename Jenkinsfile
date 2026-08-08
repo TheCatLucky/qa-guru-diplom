@@ -62,7 +62,7 @@ pipeline {
           variable: 'TELEGRAM_BOT_TOKEN'
         ),
         string(
-          credentialsId: 'tlc-tg-test-chat-id-3',
+          credentialsId: 'TLC-tg-test-chat-id-3',
           variable: 'TELEGRAM_CHAT_ID'
         ),
       ]) {
