@@ -180,11 +180,13 @@ Jenkins запускает тесты внутри `withAllureUpload`, поэт�
 
 **[Проект Allure TestOps](https://allure.qa.guru/project/5323/launches)**
 
+<img width="1904" height="675" alt="image" src="https://github.com/user-attachments/assets/b283b9ce-80df-496f-b824-85d172666fd3" />
+
 ### Allure Report в Jenkins
 
-После тестов Jenkins генерирует и архивирует Allure Report независимо от результата прогона.
-
 **[Отчет Allure Report в Jenkins](https://jenkins.qa.guru/job/tlc-jenkins/allure-report/)**
+
+<img width="1915" height="812" alt="image" src="https://github.com/user-attachments/assets/d756cc38-b247-4ee8-bc2d-88bd01b489a4" />
 
 ## CI/CD
 
@@ -211,3 +213,5 @@ Jenkins запускает тесты внутри `withAllureUpload`, поэт�
 ## Оповещения в Telegram
 
 По окончании каждого прогона в Jenkins срабатывает механизм отправки уведомлений в Telegram.
+
+<img width="507" height="625" alt="image" src="https://github.com/user-attachments/assets/9036349a-aafd-42ab-912d-f6c7d64ec8cd" />
