@@ -470,13 +470,11 @@ test.describe('Все тесты', () => {
   });
 
   test('62. Удалить все задачи', { tag: '@delete' }, async ({ api }) => {
-    let body;
+    const { body: bodyBeforeDelete } = await api.todoList.get({ token });
 
-    ({ body } = await api.todoList.get({ token }));
+    const todoList = bodyBeforeDelete.todos.map(({ id }) => id);
 
-    const ids = body.todos.map(({ id }) => id);
-
-    for (const id of ids) {
+    for (const id of todoList) {
       const { status } = await api.todoList.delete({
         token,
         id
@@ -484,7 +482,7 @@ test.describe('Все тесты', () => {
       expect(status).toBe(204);
     }
 
-    ({ body } = await api.todoList.get({ token }));
+    const { body } = await api.todoList.get({ token });
 
     expect(body.todos).toHaveLength(0);
   });
