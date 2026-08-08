@@ -1,0 +1,29 @@
+{
+  "name": "qa-guru-diplom",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:ui": "npx playwright test --ui",
+    "codegen": "npx playwright codegen",
+    "report": "npx playwright show-report",
+    "allure:report": "rm -rf allure-results allure-report & npm t && npx allure generate && npx allure open",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@faker-js/faker": "^10.4.0",
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.7.0",
+    "allure-playwright": "^3.10.0",
+    "dotenv": "^17.4.2",
+    "eslint": "^10.4.0",
+    "eslint-plugin-playwright": "^2.10.3",
+    "open": "^11.0.0"
+  }
+}
