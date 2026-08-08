@@ -22,8 +22,6 @@
     "@types/node": "^25.7.0",
     "allure-playwright": "^3.10.0",
     "dotenv": "^17.4.2",
-    "eslint": "^10.4.0",
-    "eslint-plugin-playwright": "^2.10.3",
-    "open": "^11.0.0"
+    "eslint": "^10.4.0"
   }
 }
