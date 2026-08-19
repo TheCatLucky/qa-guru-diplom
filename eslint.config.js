@@ -1,7 +1,6 @@
 import globals from 'globals';
 import sonarjs from 'eslint-plugin-sonarjs';
 import stylistic from '@stylistic/eslint-plugin';
-import importPlugin from 'eslint-plugin-import';
 import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
@@ -10,7 +9,6 @@ export default defineConfig([
   plugins: {
     sonarjs,
     "@stylistic": stylistic,
-    "@import": importPlugin,
   },
   "rules": {
       "@stylistic/comma-dangle": ["warn", {
@@ -21,12 +19,6 @@ export default defineConfig([
     "@stylistic/object-curly-spacing": ["warn", "always"],
     "@stylistic/semi": "warn",
     "@stylistic/comma-spacing": "warn",
-    "@import/named": "off",
-    "@import/no-duplicates": "warn",
-    "@import/newline-after-import": ["error", { "count": 1 }],
-    "@import/prefer-default-export": "off",
-    "@import/no-extraneous-dependencies": "off",
-
     "no-console": ["warn", {
       "allow": ["warn", "error", "info"]
     }],

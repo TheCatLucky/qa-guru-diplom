@@ -10,7 +10,7 @@ export class UserProfileSettingsPage {
     this.updateSettingsButton = page.getByRole('button', { name: 'Update Settings' });
   }
 
-  async updateUserProfileSettings({ imageUrl, username, bio, password }) {
+  async updateUserProfileSettings({ username, bio, password }) {
     return test.step('Обновить данные пользователя', async () => {
       await this.clickAndFill(this.usernameInputName, username);
       await this.clickAndFill(this.bioInputName, bio);

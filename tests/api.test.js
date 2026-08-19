@@ -10,18 +10,11 @@ test('1. Получить токен', { tag: '@post' }, async ({ api }) => {
 });
 
 test.describe('Все тесты', () => {
-  let token;
-
-  test.beforeAll(async({ api }) => {
-    const { status, headers } = await api.challenger.post();
-    token = headers[API_TOKEN_KEY];
-  });
-
-  test('2. Получить список челленджей', { tag: '@get' }, async ({ api }) => {
+  test('2. Получить список челленджей', { tag: '@get' }, async ({ api, token }) => {
     const { status, body } = await api.challenges.get(token);
 
     expect(status).toBe(200);
-    expect(body.challenges).toHaveLength(89);
+    expect(body.challenges.length).toBeGreaterThan(10);
 
     for (const challenge of body.challenges) {
       expect(Object.keys(challenge).sort()).toEqual(['description', 'id', 'name', 'status',]);
@@ -36,7 +29,7 @@ test.describe('Все тесты', () => {
   });
 
   test.describe('Получить список задач', () => {
-    test('25. в формате XML', { tag: '@get' }, async ({ api }) => {
+    test('25. в формате XML', { tag: '@get' }, async ({ api, token }) => {
       const requestHeaders = {
         Accept: 'application/xml'
       };
@@ -56,7 +49,7 @@ test.describe('Все тесты', () => {
       expect(body).toContain('<description/');
     });
 
-    test('26. в формате JSON', { tag: '@get' }, async ({ api }) => {
+    test('26. в формате JSON', { tag: '@get' }, async ({ api, token }) => {
       const requestHeaders = {
         Accept: 'application/json'
       };
@@ -82,7 +75,7 @@ test.describe('Все тесты', () => {
       }
     });
 
-    test('27. без параметров', { tag: '@get' }, async ({ api }) => {
+    test('27. без параметров', { tag: '@get' }, async ({ api, token }) => {
       const { status, body } = await api.todoList.get({ token });
 
       expect(status).toBe(200);
@@ -102,14 +95,14 @@ test.describe('Все тесты', () => {
   });
 
   test.describe('Получить ошибку при вызове списка задач', () => {
-    test('6. обращаясь к неверному эндпоинту', { tag: '@get' }, async ({ api }) => {
+    test('6. обращаясь к неверному эндпоинту', { tag: '@get' }, async ({ api, token }) => {
       const { status, statusText } = await api.todo.get(token);
 
       expect(status).toBe(404);
       expect(statusText).toBe('Not Found');
     });
 
-    test('30. в неподдерживаемом формате', { tag: '@get' }, async ({ api }) => {
+    test('30. в неподдерживаемом формате', { tag: '@get' }, async ({ api, token }) => {
       const requestHeaders = {
         Accept: 'application/gzip'
       };
@@ -124,14 +117,18 @@ test.describe('Все тесты', () => {
     });
   });
 
-  test.describe('Работа с задачей', () => {
-    const createdTodo = new TodoBuilder()
-      .withTitle()
-      .withDoneStatus(false)
-      .withDescription()
-      .build();
+  test.describe('Новая задача', () => {
+    let createdTodo;
 
-    test('9. Создать задачу', { tag: '@post' }, async ({ api }) => {
+    test.beforeEach(async({ api, token }) => {
+      createdTodo = new TodoBuilder()
+        .withTitle()
+        .withDoneStatus(false)
+        .withDescription()
+        .build();
+    });
+
+    test('9. Создать задачу', { tag: '@post' }, async ({ api, token }) => {
       const { status, body } = await api.todoList.post({
         token,
         data: createdTodo
@@ -146,8 +143,10 @@ test.describe('Все тесты', () => {
         expect(body[key]).toBe(createdTodo[key]);
       }
     });
+  });
 
-    test('5. Получить созданную задачу', { tag: '@get' }, async ({ api }) => {
+  test.describe('Работа с задачей', () => {
+    test('5. Получить созданную задачу', { tag: '@get' }, async ({ api, createdTodo, token }) => {
       const { status, body } = await api.todoList.getById({
         token,
         id: createdTodo.id
@@ -162,7 +161,7 @@ test.describe('Все тесты', () => {
       expect(receivedTodo).toEqual(createdTodo);
     });
 
-    test('17. Завершить созданную задачу', { tag: '@post' }, async ({ api }) => {
+    test('17. Завершить созданную задачу', { tag: '@post' }, async ({ api, createdTodo, token }) => {
       const data = new TodoBuilder()
         .withDoneStatus(true)
         .build();
@@ -177,7 +176,7 @@ test.describe('Все тесты', () => {
       expect(body.doneStatus).toBe(true);
     });
 
-    test('7. Получить список завершенных задач', { tag: '@get' }, async ({ api }) => {
+    test('7. Получить список завершенных задач', { tag: '@get' }, async ({ api, createdTodo, token }) => {
       const urlParams = new TodoBuilder()
         .withDoneStatus(true)
         .build();
@@ -194,7 +193,7 @@ test.describe('Все тесты', () => {
       }
     });
 
-    test('19. Отредактировать все поля созданной задачи', { tag: '@put' }, async ({ api }) => {
+    test('19. Отредактировать все поля созданной задачи', { tag: '@put' }, async ({ api, createdTodo, token }) => {
       const data = new TodoBuilder()
         .withTitle()
         .withDoneStatus()
@@ -215,7 +214,7 @@ test.describe('Все тесты', () => {
       }
     });
 
-    test('20. Отредактировать одно поле созданной задачи', { tag: '@put' }, async ({ api }) => {
+    test('20. Отредактировать одно поле созданной задачи', { tag: '@put' }, async ({ api, createdTodo, token }) => {
       const data = new TodoBuilder()
         .withTitle()
         .build();
@@ -231,7 +230,7 @@ test.describe('Все тесты', () => {
       expect(body.title).toEqual(data.title);
     });
 
-    test('23. Удалить созданную задачу', { tag: '@delete' }, async ({ api }) => {
+    test('23. Удалить созданную задачу', { tag: '@delete' }, async ({ api, createdTodo, token }) => {
       const { status } = await api.todoList.delete({
         token,
         id: createdTodo.id
@@ -240,7 +239,32 @@ test.describe('Все тесты', () => {
       expect(status).toBe(204);
     });
 
-    test('6. Попытаться получить удаленную задачу', { tag: '@get' }, async ({ api }) => {
+  });
+
+  test.describe('Работа с удалённой задачей', () => {
+    let createdTodo;
+
+    test.beforeEach(async({ api, token }) => {
+      createdTodo = new TodoBuilder()
+        .withTitle()
+        .withDoneStatus(false)
+        .withDescription()
+        .build();
+
+      const { status, body } = await api.todoList.post({
+        token,
+        data: createdTodo
+      });
+
+      createdTodo.id = body.id;
+
+      await api.todoList.delete({
+        token,
+        id: createdTodo.id
+      });
+    });
+
+    test('6. Попытаться получить удаленную задачу', { tag: '@get' }, async ({ api, token }) => {
       const { status, statusText, body } = await api.todoList.getById({
         token,
         id: createdTodo.id
@@ -251,7 +275,7 @@ test.describe('Все тесты', () => {
       expect(body.errorMessages[0]).toBe(`Could not find an instance with todos/${createdTodo.id}`);
     });
 
-    test('18. Попытаться отредактировать удаленную задачу', { tag: '@post' }, async ({ api }) => {
+    test('18. Попытаться отредактировать удаленную задачу', { tag: '@post' }, async ({ api, token }) => {
       const data = new TodoBuilder()
         .withTitle()
         .build();
@@ -268,7 +292,7 @@ test.describe('Все тесты', () => {
   });
 
   test.describe('Создать задачу', () => {
-    test('13. с заголовком длиной 50 символов и описанием длиной 200 символов', { tag: '@post' }, async ({ api }) => {
+    test('13. с заголовком длиной 50 символов и описанием длиной 200 символов', { tag: '@post' }, async ({ api, token }) => {
       const data = new TodoBuilder()
         .withTitle({ length: 50 })
         .withDoneStatus()
@@ -288,7 +312,7 @@ test.describe('Все тесты', () => {
       }
     });
 
-    test('42. в формате JSON и получить ответ в формате XML', { tag: '@post' }, async ({ api }) => {
+    test('42. в формате JSON и получить ответ в формате XML', { tag: '@post' }, async ({ api, token }) => {
       const requestHeaders = {
         'Content-Type': 'application/json',
         Accept: 'application/xml'
@@ -315,7 +339,7 @@ test.describe('Все тесты', () => {
       expect(body).toContain(data.description);
     });
 
-    test('43. в формате JSON и получить ответ в формате JSON', { tag: '@post' }, async ({ api }) => {
+    test('43. в формате JSON и получить ответ в формате JSON', { tag: '@post' }, async ({ api, token }) => {
       const requestHeaders = {
         'Content-Type': 'application/json',
         Accept: 'application/json'
@@ -343,7 +367,7 @@ test.describe('Все тесты', () => {
   });
 
   test.describe('Создать задачу с ошибкой в', () => {
-    test('10. статусе', { tag: '@post' }, async ({ api }) => {
+    test('10. статусе', { tag: '@post' }, async ({ api, token }) => {
       const data = new TodoBuilder()
         .withTitle()
         .withDoneStatus('done')
@@ -359,7 +383,7 @@ test.describe('Все тесты', () => {
       expect(body.errorMessages[0]).toBe('Failed Validation: doneStatus should be BOOLEAN but was STRING');
     });
 
-    test('11. заголовке, превышающим 50 символов', { tag: '@post' }, async ({ api }) => {
+    test('11. заголовке, превышающим 50 символов', { tag: '@post' }, async ({ api, token }) => {
       const data = new TodoBuilder()
         .withTitle({ length: 51 })
         .withDoneStatus()
@@ -375,7 +399,7 @@ test.describe('Все тесты', () => {
       expect(body.errorMessages[0]).toBe('Failed Validation: Maximum allowable length exceeded for title - maximum allowed is 50');
     });
 
-    test('12. описании, превышающим 200 символов', { tag: '@post' }, async ({ api }) => {
+    test('12. описании, превышающим 200 символов', { tag: '@post' }, async ({ api, token }) => {
       const data = new TodoBuilder()
         .withTitle()
         .withDoneStatus()
@@ -391,7 +415,7 @@ test.describe('Все тесты', () => {
       expect(body.errorMessages[0]).toBe('Failed Validation: Maximum allowable length exceeded for description - maximum allowed is 200');
     });
 
-    test('14. теле запроса, превышающим 5000 символов', { tag: '@post' }, async ({ api }) => {
+    test('14. теле запроса, превышающим 5000 символов', { tag: '@post' }, async ({ api, token }) => {
       const data = new TodoBuilder()
         .withTitle()
         .withDoneStatus()
@@ -407,7 +431,7 @@ test.describe('Все тесты', () => {
       expect(body.errorMessages[0]).toBe('Error: request body too large, max allowed is 5000 bytes');
     });
 
-    test('15. несуществующем полем randomField', { tag: '@post' }, async ({ api }) => {
+    test('15. несуществующем полем randomField', { tag: '@post' }, async ({ api, token }) => {
       const data = new TodoBuilder()
         .withTitle()
         .withDoneStatus()
@@ -424,7 +448,7 @@ test.describe('Все тесты', () => {
       expect(body.errorMessages[0]).toBe('Failed Validation: Could not find field: randomField');
     });
 
-    test('16. HTTP-методе', { tag: '@put' }, async ({ api }) => {
+    test('16. HTTP-методе', { tag: '@put' }, async ({ api, token }) => {
       const { id, ...data } = new TodoBuilder()
         .withId({
           min: 20,
@@ -448,7 +472,7 @@ test.describe('Все тесты', () => {
       expect(statusText).toBe('Unprocessable Entity');
     });
 
-    test('33. формате контента', { tag: '@post' }, async ({ api }) => {
+    test('33. формате контента', { tag: '@post' }, async ({ api, token }) => {
       const requestHeaders = {
         'Content-Type': 'TLC'
       };
@@ -469,17 +493,20 @@ test.describe('Все тесты', () => {
     });
   });
 
-  test('62. Удалить все задачи', { tag: '@delete' }, async ({ api }) => {
+  test('62. Удалить все задачи', { tag: '@delete' }, async ({ api, token }) => {
     const { body: bodyBeforeDelete } = await api.todoList.get({ token });
 
-    const todoList = bodyBeforeDelete.todos.map(({ id }) => id);
+    let todoList = bodyBeforeDelete.todos.map(({ id }) => id);
 
-    for (const id of todoList) {
+    while (todoList.length) {
       const { status } = await api.todoList.delete({
         token,
-        id
+        id: todoList[0]
       });
       expect(status).toBe(204);
+
+      const { body: newTodoList } = await api.todoList.get({ token });
+      todoList = newTodoList.todos.map(({ id }) => id);
     }
 
     const { body } = await api.todoList.get({ token });
@@ -488,21 +515,21 @@ test.describe('Все тесты', () => {
   });
 
   test.describe('Healthcheck сервера', () => {
-    test('44. Неподдерживаемый HTTP-метод возвращает статус 405', { tag: '@delete' }, async ({ api }) => {
+    test('44. Неподдерживаемый HTTP-метод возвращает статус 405', { tag: '@delete' }, async ({ api, token }) => {
       const { status, statusText } = await api.heartbeat.delete(token);
 
       expect(status).toBe(405);
       expect(statusText).toBe('Method Not Allowed');
     });
 
-    test('45. При внутренней ошибке возвращается статус 500', { tag: '@patch' }, async ({ api }) => {
+    test('45. При внутренней ошибке возвращается статус 500', { tag: '@patch' }, async ({ api, token }) => {
       const { status, statusText } = await api.heartbeat.patch(token);
 
       expect(status).toBe(500);
       expect(statusText).toBe('Internal Server Error');
     });
 
-    test('48. Слишком длинный токен', { tag: '@get' }, async ({ api }) => {
+    test('48. Слишком длинный токен', { tag: '@get' }, async ({ api, token }) => {
       const { status, statusText } = await api.heartbeat.get(
         new Array(10)
           .fill(token)

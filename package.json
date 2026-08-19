@@ -17,9 +17,12 @@
     "@eslint/js": "^10.0.1",
     "@faker-js/faker": "^10.4.0",
     "@playwright/test": "^1.60.0",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^25.7.0",
     "allure-playwright": "^3.10.0",
     "dotenv": "^17.4.2",
-    "eslint": "^10.4.0"
+    "eslint": "^10.4.0",
+    "eslint-plugin-sonarjs": "^4.2.0",
+    "globals": "^17.11.0"
   }
 }
