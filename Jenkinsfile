@@ -56,26 +56,24 @@ pipeline {
         results: [[path: 'allure-results']]
       )
 
-      nodejs('NodeJS 24.18.0') {
-        withCredentials([
-          string(
-            credentialsId: 'tlc-tg-bot-token',
-            variable: 'TELEGRAM_BOT_TOKEN'
-          ),
-          string(
-            credentialsId: 'TLC-tg-test-chat-id-3',
-            variable: 'TELEGRAM_CHAT_ID'
-          ),
-        ]) {
-          sh '''
-            set -eu
-            set +x
-            RUNTIME_CONFIG="${WORKSPACE}@tmp/allure-notifications-config.json"
-            PROXYCHAINS_CONFIG="${WORKSPACE}@tmp/proxychains-telegram.conf"
+      withCredentials([
+        string(
+          credentialsId: 'tlc-tg-bot-token',
+          variable: 'TELEGRAM_BOT_TOKEN'
+        ),
+        string(
+          credentialsId: 'TLC-tg-test-chat-id-3',
+          variable: 'TELEGRAM_CHAT_ID'
+        ),
+      ]) {
+        sh '''
+          set -eu
+          set +x
+          RUNTIME_CONFIG="${WORKSPACE}@tmp/allure-notifications-config.json"
 
-            trap 'rm -f "$RUNTIME_CONFIG" "$PROXYCHAINS_CONFIG"' EXIT
+          trap 'rm -f "$RUNTIME_CONFIG"' EXIT
 
-            cat > "$RUNTIME_CONFIG" <<EOF
+          cat > "$RUNTIME_CONFIG" <<EOF
 {
   "base": {
     "project": "${JOB_BASE_NAME}",
@@ -107,24 +105,18 @@ pipeline {
 }
 EOF
 
-            /opt/qa-guru/bin/prepare-telegram-socks-proxy.sh \
-              "$RUNTIME_CONFIG" \
-              "$PROXYCHAINS_CONFIG"
+          JAR="${WORKSPACE}@tmp/allure-notifications-5.1.1.jar"
 
-            JAR="${WORKSPACE}@tmp/allure-notifications-5.1.0.jar"
+          if [ ! -f "$JAR" ]; then
+            wget -q -O "$JAR" \
+              https://github.com/qa-guru/allure-notifications/releases/download/v5.1.1/allure-notifications-5.1.1.jar
+          fi
 
-            if [ ! -f "$JAR" ]; then
-              wget -q -O "$JAR" \
-                https://github.com/qa-guru/allure-notifications/releases/download/v5.1.0/allure-notifications-5.1.0.jar
-            fi
-
-            proxychains4 -f "$PROXYCHAINS_CONFIG" -q \
-              java \
-                -Dfile.encoding=UTF-8 \
-                "-DconfigFile=$RUNTIME_CONFIG" \
-                -jar "$JAR"
-          '''
-        }
+          java \
+            -Dfile.encoding=UTF-8 \
+            "-DconfigFile=$RUNTIME_CONFIG" \
+            -jar "$JAR"
+        '''
       }
     }
   }
