@@ -56,6 +56,7 @@ pipeline {
         results: [[path: 'allure-results']]
       )
 
+      nodejs('NodeJS 24.18.0') {
       withCredentials([
         string(
           credentialsId: 'tlc-tg-bot-token',
@@ -67,44 +68,65 @@ pipeline {
         ),
       ]) {
         sh '''
+          set -euo pipefail
           set +x
-          RUNTIME_CONFIG="${WORKSPACE}@tmp/allure-notifications-config.json"
+          export RUNTIME_CONFIG="${WORKSPACE}@tmp/allure-notifications-config.json"
 
           trap 'rm -f "$RUNTIME_CONFIG"' EXIT
 
           cat > "$RUNTIME_CONFIG" <<EOF
-          {
-            "base": {
-              "project": "${JOB_BASE_NAME}",
-              "environment": "Jenkins",
-              "comment": "Результаты сборки #${BUILD_NUMBER}",
-              "links": {
-                "testops": "${NOTIFICATION_TESTOPS_URL}",
-                "build": "${BUILD_URL}"
-              },
-              "language": "ru",
-              "allureFolder": "allure-report/",
-              "allureResultsFolder": "allure-results/",
-              "enableChart": true,
-              "chart": {
-                "mode": "pie"
-              },
-              "darkMode": true
-            },
-            "telegram": {
-              "token": "${TELEGRAM_BOT_TOKEN}",
-              "chat": "${TELEGRAM_CHAT_ID}",
-              "templatePath": "/templates/telegram.ftl"
-            },
-            "proxy": {
-              "type": "socks5",
-              "host": "proxy.qaguru.school",
-              "port": 7777
-            }
-          }
+{
+  "base": {
+    "project": "${JOB_BASE_NAME}",
+    "environment": "Jenkins",
+    "comment": "Результаты сборки #${BUILD_NUMBER}",
+    "links": {
+      "testops": "${NOTIFICATION_TESTOPS_URL}",
+      "build": "${BUILD_URL}"
+    },
+    "language": "ru",
+    "allureFolder": "allure-report/",
+    "allureResultsFolder": "allure-results/",
+    "enableChart": true,
+    "chart": {
+      "mode": "pie"
+    },
+    "darkMode": true
+  },
+  "telegram": {
+    "token": "${TELEGRAM_BOT_TOKEN}",
+    "chat": "${TELEGRAM_CHAT_ID}",
+    "templatePath": "/templates/telegram.ftl"
+  },
+  "proxy": {
+    "type": "socks5",
+    "host": "proxy.qaguru.school",
+    "port": 7777
+  }
+}
 EOF
 
+          set -a
+          # shellcheck disable=SC1091
+          source /opt/qa-guru/etc/microsocks.env
+          set +a
+          echo "microsocks env user_len=${#MICROSOCKS_USER} pass_len=${#MICROSOCKS_PASS}"
+          echo "node=$(command -v node || true)"
+
           /opt/qa-guru/bin/prepare-telegram-socks-proxy.sh "$RUNTIME_CONFIG"
+
+          node -e '
+            const fs = require("fs");
+            const proxy = JSON.parse(fs.readFileSync(process.env.RUNTIME_CONFIG, "utf8")).proxy || {};
+            const user = proxy.username || "";
+            const pass = proxy.password || "";
+            console.log(
+              "json user_len=" + user.length +
+              " pass_len=" + pass.length +
+              " cr=" + (user.includes("\\r") || pass.includes("\\r")) +
+              " type=" + (proxy.type || "")
+            );
+          '
 
           JAR="${WORKSPACE}@tmp/allure-notifications-5.1.0.jar"
 
@@ -114,9 +136,11 @@ EOF
           fi
 
           java \
+            -Dfile.encoding=UTF-8 \
             "-DconfigFile=$RUNTIME_CONFIG" \
             -jar "$JAR"
         '''
+      }
       }
     }
   }
