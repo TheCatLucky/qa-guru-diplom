@@ -184,7 +184,7 @@ Jenkins запускает тесты внутри `withAllureUpload`, поэт�
 
 ### Allure Report в Jenkins
 
-**[Отчет Allure Report в Jenkins](https://jenkins.qa.guru/job/tlc-jenkins/allure-report/)**
+**[Отчет Allure Report в Jenkins](https://jenkins.qa.guru/job/tlc-jenkins/allure/)**
 
 <img width="1915" height="812" alt="image" src="https://github.com/user-attachments/assets/d756cc38-b247-4ee8-bc2d-88bd01b489a4" />
 
