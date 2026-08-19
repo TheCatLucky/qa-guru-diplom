@@ -57,24 +57,25 @@ pipeline {
       )
 
       nodejs('NodeJS 24.18.0') {
-      withCredentials([
-        string(
-          credentialsId: 'tlc-tg-bot-token',
-          variable: 'TELEGRAM_BOT_TOKEN'
-        ),
-        string(
-          credentialsId: 'TLC-tg-test-chat-id-3',
-          variable: 'TELEGRAM_CHAT_ID'
-        ),
-      ]) {
-        sh '''
-          set -euo pipefail
-          set +x
-          export RUNTIME_CONFIG="${WORKSPACE}@tmp/allure-notifications-config.json"
+        withCredentials([
+          string(
+            credentialsId: 'tlc-tg-bot-token',
+            variable: 'TELEGRAM_BOT_TOKEN'
+          ),
+          string(
+            credentialsId: 'TLC-tg-test-chat-id-3',
+            variable: 'TELEGRAM_CHAT_ID'
+          ),
+        ]) {
+          sh '''
+            set -eu
+            set +x
+            RUNTIME_CONFIG="${WORKSPACE}@tmp/allure-notifications-config.json"
+            PROXYCHAINS_CONFIG="${WORKSPACE}@tmp/proxychains-telegram.conf"
 
-          trap 'rm -f "$RUNTIME_CONFIG"' EXIT
+            trap 'rm -f "$RUNTIME_CONFIG" "$PROXYCHAINS_CONFIG"' EXIT
 
-          cat > "$RUNTIME_CONFIG" <<EOF
+            cat > "$RUNTIME_CONFIG" <<EOF
 {
   "base": {
     "project": "${JOB_BASE_NAME}",
@@ -106,41 +107,24 @@ pipeline {
 }
 EOF
 
-          set -a
-          # shellcheck disable=SC1091
-          source /opt/qa-guru/etc/microsocks.env
-          set +a
-          echo "microsocks env user_len=${#MICROSOCKS_USER} pass_len=${#MICROSOCKS_PASS}"
-          echo "node=$(command -v node || true)"
+            /opt/qa-guru/bin/prepare-telegram-socks-proxy.sh \
+              "$RUNTIME_CONFIG" \
+              "$PROXYCHAINS_CONFIG"
 
-          /opt/qa-guru/bin/prepare-telegram-socks-proxy.sh "$RUNTIME_CONFIG"
+            JAR="${WORKSPACE}@tmp/allure-notifications-5.1.0.jar"
 
-          node -e '
-            const fs = require("fs");
-            const proxy = JSON.parse(fs.readFileSync(process.env.RUNTIME_CONFIG, "utf8")).proxy || {};
-            const user = proxy.username || "";
-            const pass = proxy.password || "";
-            console.log(
-              "json user_len=" + user.length +
-              " pass_len=" + pass.length +
-              " cr=" + (user.includes("\\r") || pass.includes("\\r")) +
-              " type=" + (proxy.type || "")
-            );
-          '
+            if [ ! -f "$JAR" ]; then
+              wget -q -O "$JAR" \
+                https://github.com/qa-guru/allure-notifications/releases/download/v5.1.0/allure-notifications-5.1.0.jar
+            fi
 
-          JAR="${WORKSPACE}@tmp/allure-notifications-5.1.0.jar"
-
-          if [ ! -f "$JAR" ]; then
-            wget -O "$JAR" \
-              https://github.com/qa-guru/allure-notifications/releases/download/v5.1.0/allure-notifications-5.1.0.jar
-          fi
-
-          java \
-            -Dfile.encoding=UTF-8 \
-            "-DconfigFile=$RUNTIME_CONFIG" \
-            -jar "$JAR"
-        '''
-      }
+            proxychains4 -f "$PROXYCHAINS_CONFIG" -q \
+              java \
+                -Dfile.encoding=UTF-8 \
+                "-DconfigFile=$RUNTIME_CONFIG" \
+                -jar "$JAR"
+          '''
+        }
       }
     }
   }
