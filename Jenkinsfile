@@ -95,6 +95,11 @@ pipeline {
               "token": "${TELEGRAM_BOT_TOKEN}",
               "chat": "${TELEGRAM_CHAT_ID}",
               "templatePath": "/templates/telegram.ftl"
+            },
+            "proxy": {
+              "type": "socks5",
+              "host": "proxy.qaguru.school",
+              "port": 7777
             }
           }
 EOF
