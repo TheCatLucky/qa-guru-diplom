@@ -97,7 +97,6 @@ pipeline {
               "templatePath": "/templates/telegram.ftl"
             },
             "proxy": {
-              "type": "socks5",
               "host": "proxy.qaguru.school",
               "port": 7777
             }
