@@ -97,17 +97,20 @@ pipeline {
               "templatePath": "/templates/telegram.ftl"
             },
             "proxy": {
+              "type": "socks5",
               "host": "proxy.qaguru.school",
               "port": 7777
             }
           }
 EOF
 
-          JAR="${WORKSPACE}@tmp/allure-notifications-5.0.3.jar"
+          /opt/qa-guru/bin/prepare-telegram-socks-proxy.sh "$RUNTIME_CONFIG"
+
+          JAR="${WORKSPACE}@tmp/allure-notifications-5.1.0.jar"
 
           if [ ! -f "$JAR" ]; then
             wget -O "$JAR" \
-              https://github.com/qa-guru/allure-notifications/releases/download/v5.0.3/allure-notifications-5.0.3.jar
+              https://github.com/qa-guru/allure-notifications/releases/download/v5.1.0/allure-notifications-5.1.0.jar
           fi
 
           java \
