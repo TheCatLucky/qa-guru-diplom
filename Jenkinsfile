@@ -67,50 +67,53 @@ pipeline {
         ),
       ]) {
         sh '''
+          set -eu
           set +x
           RUNTIME_CONFIG="${WORKSPACE}@tmp/allure-notifications-config.json"
 
           trap 'rm -f "$RUNTIME_CONFIG"' EXIT
 
           cat > "$RUNTIME_CONFIG" <<EOF
-          {
-            "base": {
-              "project": "${JOB_BASE_NAME}",
-              "environment": "Jenkins",
-              "comment": "Результаты сборки #${BUILD_NUMBER}",
-              "links": {
-                "testops": "${NOTIFICATION_TESTOPS_URL}",
-                "build": "${BUILD_URL}"
-              },
-              "language": "ru",
-              "allureFolder": "allure-report/",
-              "allureResultsFolder": "allure-results/",
-              "enableChart": true,
-              "chart": {
-                "mode": "pie"
-              },
-              "darkMode": true
-            },
-            "telegram": {
-              "token": "${TELEGRAM_BOT_TOKEN}",
-              "chat": "${TELEGRAM_CHAT_ID}",
-              "templatePath": "/templates/telegram.ftl"
-            },
-            "proxy": {
-              "host": "proxy.qaguru.school",
-              "port": 7777
-            }
-          }
+{
+  "base": {
+    "project": "${JOB_BASE_NAME}",
+    "environment": "Jenkins",
+    "comment": "Результаты сборки #${BUILD_NUMBER}",
+    "links": {
+      "testops": "${NOTIFICATION_TESTOPS_URL}",
+      "build": "${BUILD_URL}"
+    },
+    "language": "ru",
+    "allureFolder": "allure-report/",
+    "allureResultsFolder": "allure-results/",
+    "enableChart": true,
+    "chart": {
+      "mode": "pie"
+    },
+    "darkMode": true
+  },
+  "telegram": {
+    "token": "${TELEGRAM_BOT_TOKEN}",
+    "chat": "${TELEGRAM_CHAT_ID}",
+    "templatePath": "/templates/telegram.ftl"
+  },
+  "proxy": {
+    "type": "socks5",
+    "host": "proxy.qaguru.school",
+    "port": 7777
+  }
+}
 EOF
 
-          JAR="${WORKSPACE}@tmp/allure-notifications-5.0.3.jar"
+          JAR="${WORKSPACE}@tmp/allure-notifications-5.1.1.jar"
 
           if [ ! -f "$JAR" ]; then
-            wget -O "$JAR" \
-              https://github.com/qa-guru/allure-notifications/releases/download/v5.0.3/allure-notifications-5.0.3.jar
+            wget -q -O "$JAR" \
+              https://github.com/qa-guru/allure-notifications/releases/download/v5.1.1/allure-notifications-5.1.1.jar
           fi
 
           java \
+            -Dfile.encoding=UTF-8 \
             "-DconfigFile=$RUNTIME_CONFIG" \
             -jar "$JAR"
         '''
